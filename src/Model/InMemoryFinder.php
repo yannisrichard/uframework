@@ -6,10 +6,13 @@ class InMemoryFinder implements FinderInterface
 {
 	private $statuses = array();
 	
-	$this->statuses[0] = "Coucou toto";
-	$this->statuses[1] = "Coucou Bernard";
-	$this->statuses[2] = "Salut Maurice";
-	
+
+	public function __construct()
+    {
+		$this->statuses[] = "Coucou toto";
+		$this->statuses[] = "Coucou Bernard";
+		$this->statuses[] = "Salut Maurice";
+    }
 	
     /**
      * Returns all elements.

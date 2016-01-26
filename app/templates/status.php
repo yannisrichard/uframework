@@ -1,6 +1,3 @@
-<?php
-    $status = $parameters['status'];
-?>
 <!DOCTYPE html>
 <html>
 <body>

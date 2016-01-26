@@ -91,10 +91,12 @@ class App
 		return $this;
     }
 
-    public function run()
+    public function run(Request $request = null)
     {
+		//Remplacer par $method = $request->getMethode();
         $method = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : self::GET;
-        $uri    = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/';
+		
+		$uri = $request->getURI();
 
         foreach ($this->routes as $route) {
             if ($route->match($method, $uri)) {

@@ -2,7 +2,9 @@
 
 require __DIR__ . '/../autoload.php';
 
-$MemoryFinder = new \Model\InMemoryFinder();
+
+//$StatusesFinder = new \Model\InMemoryFinder();
+$StatusesFinder = new \Model\JsonFinder('../data/statuses.json');
 
 
 // Config
@@ -24,18 +26,21 @@ $app->get('/', function () use ($app) {
 /**
  * GET /statuses
  */
-$app->get('/statuses', function () use ($app) {
-    $app->render("statuses.php", $MemoryFinder->findAll());
+$app->get('/statuses', function () use ($app, $StatusesFinder) {
+    return $app->render('statuses.php', ['statuses' => $StatusesFinder->findAll()]);
 });
+
 
 /**
  * GET /statuses/id
  */
-$app->get('/statuses/(\d+)', $getStatusesId);
-
-$getStatusesId = function ($id) use ($app) {
-	$app->render("status.php", $MemoryFinder->findOneById($id));
-};
+$app->get('/statuses/(\d+)', function ($id) use ($app, $StatusesFinder) {
+	$status = $StatusesFinder->findOneById($id);
+    if ($status === null) {
+        throw new \Exception\HttpException(404, "Status ID non existant");
+    }
+	return $app->render('status.php', ['status' => $status]);
+});
  
 /**
  * GET /users
