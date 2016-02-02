@@ -23,10 +23,10 @@ class ExceptionHandler
     }
 
     /**
-     * @param Exception $exception
+     * @param Throwable $exception
      */
-    public function handle(\Exception $exception)
-    {
+     //Note : TP4 Fixing the Exception handler faite
+	public function handle(\Throwable $exception)    {
         if ($exception instanceof HttpException) {
             http_response_code($exception->getStatusCode());
         }

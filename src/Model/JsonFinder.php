@@ -4,16 +4,9 @@ namespace Model;
 
 class JsonFinder implements FinderInterface
 {
-    private $file;
-    public function __construct($fileName)
-    {
-        $this->file = $fileName;
-    /*
-        $this->json_encode_object($fileName, $status1);
-        $this->json_encode_object($fileName, $status2);
-        $this->json_encode_object($fileName, $status3);
-    * */
-    }
+	const FOLDER = '/../../data/';
+    const FILE = 'statuses';
+    const EXT = 'json';
 
     /**
      * Returns all elements.
@@ -21,7 +14,8 @@ class JsonFinder implements FinderInterface
      * @return array
      */
     public function findAll(){
-		$array_decode = json_decode(file_get_contents($this->file), true);
+		$fileContent = file_get_contents(__DIR__.self::FOLDER.self::FILE.'.'.self::EXT);
+		$array_decode = json_decode($fileContent, true);
 		
 		return $array_decode;
 	}
@@ -33,9 +27,25 @@ class JsonFinder implements FinderInterface
      * @return null|mixed
      */
     public function findOneById($id){
-		$array_decode = json_decode(file_get_contents($this->file), true);
+		$fileContent = file_get_contents(__DIR__.self::FOLDER.self::FILE.'.'.self::EXT);
+		$array_decode = json_decode($fileContent, true);
 		
 		return $array_decode[$id];
 	}
+	
+	public function create($user, $message)
+    {
+		$array = $this->findAll();
+		array_push($array, $message);
+        $array_encode = json_encode($array, JSON_FORCE_OBJECT);
+		
+		var_dump($array);
+
+        if (false === file_put_contents(__DIR__.self::FOLDER.self::FILE.'.'.self::EXT, json_encode($data), LOCK_EX)) {
+            throw new HttpException(500, 'Data file writing is impossible.');
+        }
+
+
+    }
 }
 

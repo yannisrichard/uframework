@@ -10,21 +10,35 @@ class Request
     const PUT    = 'PUT';
     const DELETE = 'DELETE';
 
-    public function __construct()
+    private $parameters = array();
+    
+    public function __construct(array $query = array(), array $request = array())
     {
-		
-		
-		
+        $this->parameters = array_merge($query, $request);
     }
+
+	public function getParameter($name, $default = null)
+    {
+        if (false === isset($this->parameters[$name])) {
+            return $default;
+        }
+
+        return $this->parameters[$name];
+	}
 
     public function getMethod()
     {
-		$method = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : self::GET;
 		//A compléter. return la methode selon le verb HTTP
 		//Cette methode est appelé dans le App.php
-
+	
+        $method = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : self::GET;
+        
+        if (self::POST === $method) {
+            return $this->getParameter('_method', $method);
+        }
+        
+        return $method;
     }
-    
     
 	/**
      * Returns the URI.
@@ -41,6 +55,11 @@ class Request
         return $uri;
     }
 
+    public static function createFromGlobals()
+    {
+		//TP3 : Modify the createFromGlobals() method to inject the global variables.
+		return new self($_GET, $_POST);
+    }
 	
 	
 	

@@ -1,6 +1,7 @@
 <?php
 
 require __DIR__ . '/../autoload.php';
+use Http\Request;
 
 
 //$StatusesFinder = new \Model\InMemoryFinder();
@@ -26,7 +27,7 @@ $app->get('/', function () use ($app) {
 /**
  * GET /statuses
  */
-$app->get('/statuses', function () use ($app, $StatusesFinder) {
+$app->get('/statuses', function (Request $request) use ($app, $StatusesFinder) {
     return $app->render('statuses.php', ['statuses' => $StatusesFinder->findAll()]);
 });
 
@@ -34,7 +35,7 @@ $app->get('/statuses', function () use ($app, $StatusesFinder) {
 /**
  * GET /statuses/id
  */
-$app->get('/statuses/(\d+)', function ($id) use ($app, $StatusesFinder) {
+$app->get('/statuses/(\d+)', function (Request $request, $id) use ($app, $StatusesFinder) {
 	$status = $StatusesFinder->findOneById($id);
     if ($status === null) {
         throw new \Exception\HttpException(404, "Status ID non existant");
@@ -58,6 +59,19 @@ $app->get('/statuses/(\d+)', function ($id) use ($app, $StatusesFinder) {
 /**
  * POST /statuses
  */
+ $app->post('/statuses', function (Request $request) use ($app) {
+    //access user data 
+    //$user = $request->getParameter('foo');
+	$user = htmlspecialchars($request->getParameter('username'));
+    $message = htmlspecialchars($request->getParameter('message'));
+    $finder = new Model\JsonFinder();
+    $finder->create($user, $message);
+	
+	//$app->redirect('/statuses');
+});
+
+
+
 
 /**
  * POST /users

@@ -4,6 +4,7 @@ use Exception\ExceptionHandler;
 use Exception\HttpException;
 use Routing\Route;
 use View\TemplateEngineInterface;
+use Http\Request;
 
 class App
 {
@@ -94,13 +95,18 @@ class App
     public function run(Request $request = null)
     {
 		//Remplacer par $method = $request->getMethode();
-        $method = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : self::GET;
+        //$method = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : self::GET;
+		//$uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/';
+		if (null === $request) {
+			$request = Request::createFromGlobals();
+		}
 		
 		$uri = $request->getURI();
+		$method = $request->getMethod();
 
         foreach ($this->routes as $route) {
             if ($route->match($method, $uri)) {
-                return $this->process($route);
+                return $this->process($route, $request);
             }
         }
 
@@ -110,11 +116,17 @@ class App
     /**
      * @param Route $route
      */
-    private function process(Route $route)
+    private function process(Route $route, Request $request)
     {
+		$arguments = $route->getArguments();
+		array_unshift($arguments, $request);
+
+
+		
         try {
+			$response = call_user_func_array($route->getCallable(), $arguments);
             http_response_code($this->statusCode);
-            echo call_user_func_array($route->getCallable(), $route->getArguments());
+            echo $response;
         } catch (HttpException $e) {
             throw $e;
         } catch (\Exception $e) {
@@ -131,4 +143,12 @@ class App
     {
 		$this->routes[] = new Route($method, $pattern, $callable);      
     }
+    
+    public function redirect($to, $statusCode = 302)
+	{
+		http_response_code($statusCode);
+		header(sprintf('Location: %s', $to));
+
+		die;
+	}
 }
