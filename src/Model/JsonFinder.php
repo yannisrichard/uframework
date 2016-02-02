@@ -36,16 +36,22 @@ class JsonFinder implements FinderInterface
 	public function create($user, $message)
     {
 		$array = $this->findAll();
-		array_push($array, $message);
-        $array_encode = json_encode($array, JSON_FORCE_OBJECT);
+		array_push($array, $user.' : ' .$message);
 		
-		var_dump($array);
-
-        if (false === file_put_contents(__DIR__.self::FOLDER.self::FILE.'.'.self::EXT, json_encode($data), LOCK_EX)) {
+        if (false === file_put_contents(__DIR__.self::FOLDER.self::FILE.'.'.self::EXT, json_encode($array), LOCK_EX)) {
             throw new HttpException(500, 'Data file writing is impossible.');
         }
+    }
+    
+	public function delete($id)
+    {
+		$array = $this->findAll();
+		unset($array[$id]);
+		$array = array_values($array);
 
-
+		if (false === file_put_contents(__DIR__.self::FOLDER.self::FILE.'.'.self::EXT, json_encode($array), LOCK_EX)) {
+            throw new HttpException(500, 'Data file writing is impossible.');
+        }
     }
 }
 

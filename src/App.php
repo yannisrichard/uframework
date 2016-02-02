@@ -5,6 +5,8 @@ use Exception\HttpException;
 use Routing\Route;
 use View\TemplateEngineInterface;
 use Http\Request;
+use Http\Response;
+
 
 class App
 {
@@ -124,9 +126,12 @@ class App
 
 		
         try {
-			$response = call_user_func_array($route->getCallable(), $arguments);
-            http_response_code($this->statusCode);
-            echo $response;
+			$contentResponse = call_user_func_array($route->getCallable(), $arguments);
+            //~ http_response_code($this->statusCode);
+            //~ echo $response;
+			$response = new Response($contentResponse,$this->statusCode);
+            $response->send();
+
         } catch (HttpException $e) {
             throw $e;
         } catch (\Exception $e) {

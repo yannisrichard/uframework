@@ -1,7 +1,9 @@
 <?php
 
-require __DIR__ . '/../autoload.php';
+$loader = require __DIR__ . '/../vendor/autoload.php';
 use Http\Request;
+use Http\Response;
+
 
 
 //$StatusesFinder = new \Model\InMemoryFinder();
@@ -28,7 +30,28 @@ $app->get('/', function () use ($app) {
  * GET /statuses
  */
 $app->get('/statuses', function (Request $request) use ($app, $StatusesFinder) {
-    return $app->render('statuses.php', ['statuses' => $StatusesFinder->findAll()]);
+    //~ return $app->render('statuses.php', ['statuses' => $StatusesFinder->findAll()]);
+	
+	$format = $request->guessBestFormat();
+	var_dump($format);
+	//Fin TP4 : Testing commande curl
+	//Actuellement retourne du HTML
+	//Mais devrait retourner JSON
+	
+	//Note : $format retourne text/html
+	
+	
+	
+    $response = null;
+    $statuses = $StatusesFinder->findAll();
+    if ('json' === $format) {
+        $response = new Response(json_encode($statuses,JSON_FORCE_OBJECT), 200, array('Content-Type' => 'application/json'));
+        $response->send();
+        return;
+    }
+    return $app->render('statuses.php', array('statuses' => $statuses));
+
+    
 });
 
 
@@ -40,7 +63,15 @@ $app->get('/statuses/(\d+)', function (Request $request, $id) use ($app, $Status
     if ($status === null) {
         throw new \Exception\HttpException(404, "Status ID non existant");
     }
-	return $app->render('status.php', ['status' => $status]);
+    
+	$format = $request->guessBestFormat();
+    if ('json' === $format) {
+        $response = new Response(json_encode($status), 200, array('Content-Type' => 'application/json'));
+        $response->send();
+        return;
+    }
+
+	return $app->render('status.php', ['status' => $status, 'id' => $id]);
 });
  
 /**
@@ -60,14 +91,15 @@ $app->get('/statuses/(\d+)', function (Request $request, $id) use ($app, $Status
  * POST /statuses
  */
  $app->post('/statuses', function (Request $request) use ($app) {
-    //access user data 
-    //$user = $request->getParameter('foo');
-	$user = htmlspecialchars($request->getParameter('username'));
-    $message = htmlspecialchars($request->getParameter('message'));
-    $finder = new Model\JsonFinder();
-    $finder->create($user, $message);
+    $format = $request->guessBestFormat();
+	if ("html" === $format || "json" === $format) {
+		$user = htmlspecialchars($request->getParameter('username'));
+		$message = htmlspecialchars($request->getParameter('message'));
+		$finder = new Model\JsonFinder();
+		$finder->create($user, $message);
+	}
 	
-	//$app->redirect('/statuses');
+	$app->redirect('/statuses');
 });
 
 
@@ -80,12 +112,20 @@ $app->get('/statuses/(\d+)', function (Request $request, $id) use ($app, $Status
  
  
 /**
- * DELETE /statuses
- */
-
-/**
  * DELETE /statuses/id
  */
+$app->delete('/statuses/(\d+)', function (Request $request, $id) use ($app, $StatusesFinder) {
+	$status = $StatusesFinder->findOneById($id);
+    if ($status === null) {
+        throw new \Exception\HttpException(404, "Status doesn't exist");
+    }
+    $StatusesFinder->delete($id);
+    
+    //Note: A REST API should return a 204 status code which stands for No Content.
+  
+	$app->redirect('/statuses');
+});
+ 
  
 /**
  * DELETE /users
