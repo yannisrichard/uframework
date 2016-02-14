@@ -1,0 +1,11 @@
+L'application fonctionne jusqu'au sujet 6. 
+Les tests demandé ont également été fait, j'ai également fait des tests avec Goutte.
+Mais j'ai eu des problémes plusieurs fois lors des tests avec les methodes POST tandis que les GET sont ok,
+au début avec CURL dans le TP4 :
+curl -XPOST -H "Accept: application/json" -H 'Content-Type: application/json' \
+    -d '{"message": "Hello", "username": "..."}' \
+    http://localhost:8082/statuses
+Puis j'ai eu égalment des problémes avec Goutte pour les POST.
+
+Je n'ai pas essayé Behat ou Minsk à la fin du TP6.
+La partie graphique de l'application a été réalisé avec bootstrap.
