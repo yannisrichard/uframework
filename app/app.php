@@ -4,7 +4,6 @@ $loader = require __DIR__ . '/../vendor/autoload.php';
 use Http\Request;
 use Http\Response;
 
-
 // Persistence
 //Note à modifier selon le port recupérer avec docker ps de mysql
 $connection = new \Model\Database\Connection("mysql:dbname=uframework;host=127.0.0.1;port=32770", "uframework", "p4ssw0rd");
@@ -15,7 +14,6 @@ $userFinder = new \Model\Database\UserFinder($connection);
 
 //$statusFinder = new \Model\InMemoryFinder();
 //$statusFinder = new \Model\JsonFinder('../data/statuses.json');
-
 
 // Config
 $debug = true;
@@ -31,7 +29,6 @@ $app->get('/', function () use ($app) {
     //return $app->render('index.php');
     $app->redirect('/statuses');
 });
-
 
 /**
  * GET /statuses
@@ -69,14 +66,14 @@ $app->get('/statuses/(\d+)', function (Request $request, $id) use ($app, $status
 
     return  $app->render('status.php', array('status' => $status));
 });
- 
+
 /*
  *  GET /statusNotFound
  */
  $app->get('/statusNotFound', function (Request $request) use ($app) {
     return $app->render('statusNotFound.php',[], 404);
 });
- 
+
 /*
  * GET /register
  */
@@ -106,18 +103,18 @@ $app->get('/logout', function (Request $request) use ($app) {
     session_destroy();
 
     return $app->redirect('/');
-}); 
- 
+});
+
 /*
  * POST /statuses
  */
 $app->post('/statuses', function (Request $request) use ($app,$statusMapper) {
     $format = $request->guessBestFormat();
     if ("html" === $format || "json" === $format) {
-		//$user = htmlspecialchars($request->getParameter('username'));
-		//$message = htmlspecialchars($request->getParameter('message'));
-		//$finder = new Model\JsonFinder();
-		//$finder->create($user, $message);
+        //$user = htmlspecialchars($request->getParameter('username'));
+        //$message = htmlspecialchars($request->getParameter('message'));
+        //$finder = new Model\JsonFinder();
+        //$finder->create($user, $message);
 
         if (isset($_SESSION['is_authenticated']) && $_SESSION['is_authenticated']) {
             $user = $_SESSION['user'];
@@ -173,7 +170,38 @@ $app->delete('/statuses/(\d+)', function (Request $request, $id) use ($app,$stat
     $statusMapper->remove($id);
     $app->redirect('/statuses');
 });
- 
 
+// Firewall
+$app->addListener('process.before', function (Request $req) use ($app) {
+    session_start();
+
+    $allowed = [
+        '/login' => [ Request::GET, Request::POST ],
+        '/statuses/(\d+)' => [ Request::GET ],
+        '/statuses' => [ Request::GET, Request::POST ],
+        '/register' => [ Request::GET, Request::POST ],
+        '/statusNotFound' => [ Request::GET ],
+        '/' => [ Request::GET ],
+    ];
+
+    if (isset($_SESSION['is_authenticated'])
+        && true === $_SESSION['is_authenticated']) {
+        return;
+    }
+
+    foreach ($allowed as $pattern => $methods) {
+        if (preg_match(sprintf('#^%s$#', $pattern), $req->getUri())
+            && in_array($req->getMethod(), $methods)) {
+            return;
+        }
+    }
+
+    switch ($req->guessBestFormat()) {
+        case 'json':
+            throw new HttpException(401);
+    }
+
+    return $app->redirect('/login');
+});
 
 return $app;

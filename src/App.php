@@ -7,7 +7,6 @@ use View\TemplateEngineInterface;
 use Http\Request;
 use Http\Response;
 
-
 class App
 {
     const GET    = 'GET';
@@ -75,36 +74,36 @@ class App
     }
 
     // Something is missing here...
-	public function post($pattern, $callable)
+    public function post($pattern, $callable)
     {
-		$this->registerRoute(self::POST, $pattern, $callable);
-		
-		return $this;
+        $this->registerRoute(self::POST, $pattern, $callable);
+
+        return $this;
     }
-	public function put($pattern, $callable)
+    public function put($pattern, $callable)
     {
-		$this->registerRoute(self::PUT, $pattern, $callable);
-		
-		return $this;
+        $this->registerRoute(self::PUT, $pattern, $callable);
+
+        return $this;
     }
-	public function delete($pattern, $callable)
+    public function delete($pattern, $callable)
     {
-		$this->registerRoute(self::DELETE, $pattern, $callable);
-		
-		return $this;
+        $this->registerRoute(self::DELETE, $pattern, $callable);
+
+        return $this;
     }
 
     public function run(Request $request = null)
     {
-		//Remplacer par $method = $request->getMethode();
+        //Remplacer par $method = $request->getMethode();
         //$method = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : self::GET;
-		//$uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/';
-		if (null === $request) {
-			$request = Request::createFromGlobals();
-		}
-		
-		$uri = $request->getURI();
-		$method = $request->getMethod();
+        //$uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/';
+        if (null === $request) {
+            $request = Request::createFromGlobals();
+        }
+
+        $uri = $request->getURI();
+        $method = $request->getMethod();
 
         foreach ($this->routes as $route) {
             if ($route->match($method, $uri)) {
@@ -120,16 +119,14 @@ class App
      */
     private function process(Route $route, Request $request)
     {
-		$arguments = $route->getArguments();
-		array_unshift($arguments, $request);
+        $arguments = $route->getArguments();
+        array_unshift($arguments, $request);
 
-
-		
         try {
-			$contentResponse = call_user_func_array($route->getCallable(), $arguments);
+            $contentResponse = call_user_func_array($route->getCallable(), $arguments);
             //~ http_response_code($this->statusCode);
             //~ echo $response;
-			$response = new Response($contentResponse,$this->statusCode);
+            $response = new Response($contentResponse,$this->statusCode);
             $response->send();
 
         } catch (HttpException $e) {
@@ -146,14 +143,14 @@ class App
      */
     private function registerRoute($method, $pattern, $callable)
     {
-		$this->routes[] = new Route($method, $pattern, $callable);      
+        $this->routes[] = new Route($method, $pattern, $callable);
     }
-    
-    public function redirect($to, $statusCode = 302)
-	{
-		http_response_code($statusCode);
-		header(sprintf('Location: %s', $to));
 
-		die;
-	}
+    public function redirect($to, $statusCode = 302)
+    {
+        http_response_code($statusCode);
+        header(sprintf('Location: %s', $to));
+
+        die;
+    }
 }

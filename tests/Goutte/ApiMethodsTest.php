@@ -4,7 +4,7 @@ use Goutte\Client;
 
 class ApiMethodsTest extends \PHPUnit_Framework_TestCase
 {
-    private $endpoint = 'http://localhost:82';
+    private $endpoint = 'http://localhost:8080';
     private $client;
 
     public function setUp()
@@ -14,7 +14,6 @@ class ApiMethodsTest extends \PHPUnit_Framework_TestCase
 
     public function testGetStatuses()
     {
-        // GET
         $this->client->request('GET', sprintf('%s/statuses', $this->endpoint));
         $response = $this->client->getResponse();
         $this->assertEquals(200, $response->getStatus());
