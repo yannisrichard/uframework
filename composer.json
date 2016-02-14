@@ -2,6 +2,9 @@
     "require": {
     		"willdurand/negotiation": "@stable"
     },
+	"require-dev": {
+		"fabpot/goutte": "~2.0"
+	},
     "autoload": {
         "psr-4": { "": [ "src/" ] }
     }

@@ -32,7 +32,7 @@ class Request
 
     public function getMethod()
     {
-		//A compléter. return la methode selon le verb HTTP
+		//Return la methode selon le verb HTTP
 		//Cette methode est appelé dans le App.php
 	
         $method = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : self::GET;
